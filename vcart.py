@@ -29,11 +29,11 @@ def get_token(url, t_type):
 
 def add_to_cart(item):
     item_url = urllib2.urlopen('https://www.vinmonopolet.no/vmpSite/search/autocomplete/SearchBox?term=' + item)
-    if len(item_url.read()) < 100:
+    try:
+        item_url = 'https://www.vinmonopolet.no/' + json.loads(item_url.read())["products"][0]["url"]
+    except:
         print "Item not found: " + item
         return False
-    else:
-        item_url = 'https://www.vinmonopolet.no/' + json.loads(item_url.read())["products"][0]["url"]
     csrf_token = get_token(item_url, "add")
     data = urllib.urlencode({'productCodePost': item,
                             'qty': '1',

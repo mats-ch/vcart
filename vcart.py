@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import sys
-import re
 import json
 import urllib
 import urllib2
@@ -30,7 +29,11 @@ def get_token(url, t_type):
 
 def add_to_cart(item):
     item_url = urllib2.urlopen('https://www.vinmonopolet.no/vmpSite/search/autocomplete/SearchBox?term=' + item)
-    item_url = 'https://www.vinmonopolet.no/' + json.loads(item_url.read())["products"][0]["url"]
+    if len(item_url.read()) < 100:
+        print "Item not found: " + item
+        return False
+    else:
+        item_url = 'https://www.vinmonopolet.no/' + json.loads(item_url.read())["products"][0]["url"]
     csrf_token = get_token(item_url, "add")
     data = urllib.urlencode({'productCodePost': item,
                             'qty': '1',
@@ -43,12 +46,11 @@ def add_to_cart(item):
 
 def login_polet(uname, pword):
     csrf_token = get_token("https://www.vinmonopolet.no/vmpSite/login", "login")
-    login_data = urllib.urlencode({
-        'j_username': uname,
-        'j_password': pword,
-        'CSRFToken': csrf_token})
+    data = urllib.urlencode({'j_username': uname,
+                            'j_password': pword,
+                            'CSRFToken': csrf_token})
     try:    
-        r = opener.open(login_url, login_data)
+        r = opener.open(login_url, data)
     except urllib2.HTTPError, error:
         print error.read()
 
